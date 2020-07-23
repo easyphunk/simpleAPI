@@ -1,81 +1,95 @@
-const fs = require('fs');
+const Trip = require('./../models/Trip');
+const { query } = require('express');
 
-const trips = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`));
-
-exports.checkID = (req, res, next, val) => {
-    console.log(`Trip ID requested is: ${val}`);
-    if (req.params.id * 1 > trips.length) {
-        return res.status(404).json({
+exports.getAllTrips = async (req, res) => {
+    try {
+        const trips = await Trip.find();
+        res.status(200).json({
+            status: 'success',
+            results: trips.length,
+            data: {
+                trips
+            }
+        });
+    } catch (err) {
+        res.status(404).json({
             status: 'fail',
-            message: 'Invalid ID'
+            message: err
         });
     }
-    next();
-}
+};
 
-exports.checkBody = (req, res, next) => {
-    if(!req.body.name || !req.body.price) {
-        return res.status(400).json({
+exports.getTrip = async (req, res) => {
+    try {
+        const trip = await Trip.findById(req.params.id);
+        res.status(200).json({
+            status: 'success',
+            data: {
+                trip
+            }
+        });
+
+    } catch (err) {
+        res.status(404).json({
             status: 'fail',
-            message: 'Missing price or name'
+            message: err
         });
     }
-    next();
-}
-
-exports.getAllTrips = (req, res) => {
-    console.log(req.requestTime)
-    res.status(200).json({
-        status: 'success',
-        requestTime: req.requestTime,
-        results: trips.length,
-        data: {
-            trips
-        }
-    });
 };
 
-exports.getTrip = (req, res) => {
-    const trip = trips.find(trip => Number(trip.id) === Number(req.params.id));
+exports.createTrip = async (req, res) => {
+    try {
+        const newTrip = await Trip.create(req.body);
 
-    res.status(200).json({
-        status: 'success',
-        data: {
-            trip
-        }
-    });
-};
-
-exports.createTrip = (req, res) => {
-    const newId = trips[trips.length - 1].id + 1;
-    const newTrip = Object.assign({ id: newId }, req.body);
-
-    trips.push(newTrip);
-
-    fs.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(trips), err => {
         res.status(201).json({
             status: 'success',
             data: {
                 trip: newTrip
             }
-        })
-    })
+        });
+    } catch (err) {
+        res.status(400).json({
+            status: 'fail',
+            message: 'Invalid data sent!'
+        });
+    }
 };
 
-exports.updateTrip = (req, res) => {
-    res
-        .status(500)
-        .json({
-            status: 'error',
-            message: 'This route is not yet defined!'
+exports.updateTrip = async (req, res) => {
+    try {
+        const trip = await Trip.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidators: true
         });
+
+        res.status(200).json({
+            status: 'success',
+            data: {
+                trip
+            }
+        });
+    } catch (err) {
+        res.status(404).json({
+            status: 'fail',
+            message: err
+        });
+    }
+
 }
 
-exports.deleteTrip = (req, res) => {
-    res
-        .status(500)
-        .json({
-            status: 'error',
-            message: 'This route is not yet defined!'
+exports.deleteTrip = async (req, res) => {
+    try {
+        await Trip.findByIdAndDelete(req.params.id);
+
+        res.status(204).json({
+            status: 'success',
+            data: null
+        })
+    } catch (err) {
+        res.status(404).json({
+            status: 'fail',
+            message: err
         });
+    }
+
 }
