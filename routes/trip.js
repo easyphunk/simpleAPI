@@ -8,10 +8,6 @@ router
     .get(tripController.aliasTopTrips, tripController.getAllTrips);
 
 router
-    .route('/trip-stats')
-    .get(tripController.getTripStats)
-
-router
     .route('/')
     .get(tripController.getAllTrips)
     .post(tripController.createTrip);

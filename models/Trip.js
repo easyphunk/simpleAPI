@@ -31,8 +31,7 @@ const tripSchema = new mongoose.Schema({
     overview: {
         type: String,
         required: [true, 'The trip must have an overview'],
-        trim: true,
-        minlength: [50, 'The trip overview must be at least 50 characters long']
+        trim: true
     },
     climbingHistory: {
         type: String,
@@ -63,19 +62,7 @@ const tripSchema = new mongoose.Schema({
     }],
     images: [String],
     comments: [{}]
-}, {
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
 });
-
-tripSchema.virtual('mapboxCoordinates').get(function() {
-    const mapboxObject = {
-        lng: this.longitude,
-        alt: this.latitude,
-        zoom: 2
-    }
-    return mapboxObject;
-})
 
 const Trip = mongoose.model('Trip', tripSchema);
 
