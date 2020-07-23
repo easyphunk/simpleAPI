@@ -1,5 +1,4 @@
 const Trip = require('./../models/Trip');
-const { query } = require('express');
 
 exports.getAllTrips = async (req, res) => {
     try {
