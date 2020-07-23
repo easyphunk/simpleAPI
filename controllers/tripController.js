@@ -1,8 +1,23 @@
 const Trip = require('./../models/Trip');
+const APIFeatuers = require('./../utils/apiFeatures');
+
+exports.aliasTopTrips = async (req, res, next) => {
+    req.query.limit = '3';
+    req.query.sort = '-likes';
+    next();
+}
 
 exports.getAllTrips = async (req, res) => {
     try {
-        const trips = await Trip.find();
+        // Execute query
+        const queryFeatures = new APIFeatuers(Trip.find(), req.query)
+            .filter()
+            .sort()
+            .limitFields()
+            .paginate();
+        const trips = await queryFeatures.query;
+
+        // Send response
         res.status(200).json({
             status: 'success',
             results: trips.length,
