@@ -1,21 +1,21 @@
 const Trip = require('./../models/Trip');
-const APIFeatuers = require('./../utils/apiFeatures');
+const dbRequestFeatures = require('../utils/dbRequestFeatures');
 
 exports.aliasTopTrips = async (req, res, next) => {
     req.query.limit = '3';
     req.query.sort = '-likes';
     next();
-}
+};
 
 exports.getAllTrips = async (req, res) => {
     try {
         // Execute query
-        const queryFeatures = new APIFeatuers(Trip.find(), req.query)
+        const dbRequest = new dbRequestFeatures(Trip.find(), req.query)
             .filter()
             .sort()
             .limitFields()
             .paginate();
-        const trips = await queryFeatures.query;
+        const trips = await dbRequest.query;
 
         // Send response
         res.status(200).json({
@@ -89,7 +89,7 @@ exports.updateTrip = async (req, res) => {
         });
     }
 
-}
+};
 
 exports.deleteTrip = async (req, res) => {
     try {
@@ -106,4 +106,44 @@ exports.deleteTrip = async (req, res) => {
         });
     }
 
-}
+};
+
+exports.getTripStats = async (req, res) => {
+    try {
+        const stats = await Trip.aggregate([
+            {
+                $match: { elevation: { $gte: 0 } }
+            },
+            {
+                $group: {
+                    _id: '$location',
+                    countTrips: { $sum: 1},
+                    avgViews: { $avg: '$views' },
+                    avgLikes: { $avg: '$likes'},
+                    avgElevation: { $avg: '$elevation' },
+                    minElevation: { $min: '$elevation' },
+                    maxElevation: { $max: '$elevation' }
+                }
+            },
+            {
+                $sort: {
+                    avgViews: 1
+                }
+            }
+        ]);
+
+        res.status(200).json({
+            status: 'success',
+            results: stats.length,
+            data: {
+                stats
+            }
+        });
+        
+    } catch (err) {
+        res.status(404).json({
+            status: 'fail',
+            message: err
+        });
+    }
+};
