@@ -1,4 +1,4 @@
-class dbRequestFeatures {
+class DBRequestFeatures {
     constructor(query, queryString) {
         this.query = query;
         this.queryString = queryString;
@@ -54,4 +54,4 @@ class dbRequestFeatures {
     }
 }
 
-module.exports = dbRequestFeatures;
+module.exports = DBRequestFeatures;

@@ -1,5 +1,6 @@
 const Trip = require('./../models/Trip');
-const dbRequestFeatures = require('../utils/dbRequestFeatures');
+const DBRequestFeatures = require('../utils/DBRequestFeatures');
+const AppError = require('../utils/AppError');
 
 exports.aliasTopTrips = async (req, res, next) => {
     req.query.limit = '3';
@@ -7,10 +8,10 @@ exports.aliasTopTrips = async (req, res, next) => {
     next();
 };
 
-exports.getAllTrips = async (req, res) => {
+exports.getAllTrips = async (req, res, next) => {
     try {
         // Execute query
-        const dbRequest = new dbRequestFeatures(Trip.find(), req.query)
+        const dbRequest = new DBRequestFeatures(Trip.find(), req.query)
             .filter()
             .sort()
             .limitFields()
@@ -26,16 +27,16 @@ exports.getAllTrips = async (req, res) => {
             }
         });
     } catch (err) {
-        res.status(404).json({
-            status: 'fail',
-            message: err
-        });
+        next(err);
     }
 };
 
-exports.getTrip = async (req, res) => {
+exports.getTrip = async (req, res, next) => {
     try {
         const trip = await Trip.findById(req.params.id);
+        if (!trip) {
+            throw new AppError('No trip found with this ID', 404);
+        }
         res.status(200).json({
             status: 'success',
             data: {
@@ -44,14 +45,11 @@ exports.getTrip = async (req, res) => {
         });
 
     } catch (err) {
-        res.status(404).json({
-            status: 'fail',
-            message: err
-        });
+        next(err);
     }
 };
 
-exports.createTrip = async (req, res) => {
+exports.createTrip = async (req, res, next) => {
     try {
         const newTrip = await Trip.create(req.body);
 
@@ -62,19 +60,20 @@ exports.createTrip = async (req, res) => {
             }
         });
     } catch (err) {
-        res.status(400).json({
-            status: 'fail',
-            message: 'Invalid data sent!'
-        });
+        next(err);
     }
 };
 
-exports.updateTrip = async (req, res) => {
+exports.updateTrip = async (req, res, next) => {
     try {
         const trip = await Trip.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
             runValidators: true
         });
+
+        if (!trip) {
+            throw new AppError('No trip found with this ID', 404);
+        }
 
         res.status(200).json({
             status: 'success',
@@ -83,32 +82,30 @@ exports.updateTrip = async (req, res) => {
             }
         });
     } catch (err) {
-        res.status(404).json({
-            status: 'fail',
-            message: err
-        });
+        next(err);
     }
 
 };
 
-exports.deleteTrip = async (req, res) => {
+exports.deleteTrip = async (req, res, next) => {
     try {
-        await Trip.findByIdAndDelete(req.params.id);
+        const trip = await Trip.findByIdAndDelete(req.params.id);
+
+        if (!trip) {
+            throw new AppError('No trip found with this ID', 404);
+        }
 
         res.status(204).json({
             status: 'success',
             data: null
         })
     } catch (err) {
-        res.status(404).json({
-            status: 'fail',
-            message: err
-        });
+        next(err);
     }
 
 };
 
-exports.getTripStats = async (req, res) => {
+exports.getTripStats = async (req, res, next) => {
     try {
         const stats = await Trip.aggregate([
             {
@@ -141,9 +138,6 @@ exports.getTripStats = async (req, res) => {
         });
         
     } catch (err) {
-        res.status(404).json({
-            status: 'fail',
-            message: err
-        });
+        next(err);
     }
 };
