@@ -4,11 +4,9 @@ const jwt = require('../utils/jwt');
 
 exports.getAllUsers = async (req, res, next) => {
     try {
-        const users = await User.find();
+        const users = await User.find().select('_id email username userAccess');
 
-        res
-            .status(200)
-            .json({
+        res.status(200).json({
                 status: 'success',
                 results: users.length,
                 data: {
@@ -28,9 +26,7 @@ exports.getUser = async (req, res, next) => {
             throw new AppError('No user found with this ID', 404);
         }
 
-        res
-            .status(200)
-            .json({
+        res.status(200).json({
                 status: 'success',
                 data: {
                     user
@@ -40,62 +36,6 @@ exports.getUser = async (req, res, next) => {
         next(err);
     }
 };
-
-exports.createUser = async (req, res, next) => {
-    try {
-        const newUser = await User.create(req.body);
-        console.log(newUser);
-        const token = jwt.createToken({ id: newUser._id });
-
-        res
-            .status(200)
-            .header('Authorization', token)
-            .json({
-                status: 'success',
-                data: {
-                    user: newUser
-                }
-            });
-    } catch (err) {
-        next(err);
-    }
-};
-
-exports.login = async (req, res, next) => {
-    const { username, password } = req.body;
-    try {
-        const user = await User.findOne({ username });
-
-        if (!user) {
-            throw new AppError('No user found with this username', 404);
-        }
-
-        const match = await user.matchPassword(password);
-        if (!match) {
-            res
-                .status(401)
-                .json({
-                    status: 'fail',
-                    message: 'Invalid Password!'
-                })
-            return;
-        }
-
-        const token = jwt.createToken({ id: user._id });
-        
-        res
-            .header('Authorization', token)
-            .json({
-                status: 'success',
-                data: {
-                    user
-                }
-            })
-
-    } catch (err) {
-        next(err);
-    }
-}
 
 exports.verifyLogin = async (req, res, next) => {
     const token = req.body.token || '';
@@ -132,9 +72,7 @@ exports.updateUser = async (req, res, next) => {
             throw new AppError('No user found with this ID', 404);
         }
 
-        res
-            .status(200)
-            .json({
+        res.status(200).json({
                 status: 'success',
                 data: {
                     user
