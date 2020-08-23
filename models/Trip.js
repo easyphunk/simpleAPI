@@ -32,7 +32,6 @@ const tripSchema = new mongoose.Schema({
         type: String,
         required: [true, 'The trip must have an overview'],
         trim: true,
-        minlength: [50, 'The trip overview must be at least 50 characters long']
     },
     climbingHistory: {
         type: String,

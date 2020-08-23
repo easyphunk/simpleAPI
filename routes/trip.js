@@ -1,5 +1,6 @@
 const express = require('express');
 const tripController = require('../controllers/tripController');
+const authController = require('../controllers/authController');
 
 const router = express.Router();
 
@@ -13,7 +14,7 @@ router
 
 router
     .route('/')
-    .get(tripController.getAllTrips)
+    .get(authController.authCheck, tripController.getAllTrips)
     .post(tripController.createTrip);
 
 router
