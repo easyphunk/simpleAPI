@@ -10,7 +10,7 @@ router
 
 router
     .route('/trip-stats')
-    .get(tripController.getTripStats)
+    .get(tripController.getTripStats);
 
 router
     .route('/')
@@ -20,7 +20,15 @@ router
 router
     .route('/:id')
     .get(tripController.getTrip)
-    .patch(tripController.updateTrip)
-    .delete(tripController.deleteTrip);
+    .patch(
+        authController.authCheck,
+        authController.restrictTo('admin'),
+        tripController.updateTrip
+    )
+    .delete(
+        authController.authCheck,
+        authController.restrictTo('admin'),
+        tripController.deleteTrip
+    );
 
 module.exports = router;
