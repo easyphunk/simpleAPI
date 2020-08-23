@@ -40,14 +40,15 @@ exports.login = async (req, res, next) => {
         }
 
         const token = jwt.createToken({ id: user._id });
+        
         res.status(200).json({
             status: 'success',
             token
-        })
+        });
     } catch (err) {
         next(err);
     }
-}
+};
 
 exports.authCheck = async (req, res, next) => {
     try {
@@ -81,4 +82,15 @@ exports.authCheck = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-}
+};
+
+exports.restrictTo = (...roles) => {
+    return (req, res, next) => {
+        // roles is an array
+        if(!roles.includes(req.user.role)) {
+            return next(new AppError('You do not have permission to perform this action', 403));
+        }
+
+        next();
+    };
+};
