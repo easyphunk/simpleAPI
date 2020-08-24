@@ -1,6 +1,15 @@
 const User = require('./../models/User');
 const AppError = require('../utils/AppError');
-const jwt = require('../utils/jwt');
+
+const filterObj = (obj, ...allowedFields) => {
+    const newObj = {};
+    
+    Object.keys(obj).map(el => {
+        if (allowedFields.includes(el)) newObj[el] = obj[el];
+    });
+    
+    return newObj;
+};
 
 exports.getAllUsers = async (req, res, next) => {
     try {
@@ -37,29 +46,42 @@ exports.getUser = async (req, res, next) => {
     }
 };
 
-exports.verifyLogin = async (req, res, next) => {
-    const token = req.body.token || '';
-    jwt.verifyToken(token)
-        .then(data => {
-            User.findById(data.id)
-                .then(user => {
-                    return res.status(200).json({
-                        status: true,
-                        user
-                    });
-                });
+exports.updateCurrentUser = async (req, res, next) => {
+    try {
+        // throw error if user POSTs password data
+        if (req.body.password || req.body.confirmPassword) {
+            return next(new AppError('This route is not for password updates. Please use /updatePassword.', 400));
+        }
+        
+        const filteredBody = filterObj(req.body, 'username', 'email');
+        const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
+            new: true,
+            runValidators: true
         })
-        .catch(err => {
-            if(['jwt must be provided'].includes(err.message)) {
-                res.status(401).send('Unauthorized!');
-                return;
+    
+        res.status(200).json({
+            status: 'success',
+            data: {
+                user: updatedUser
             }
-
-            res.send({
-                status: false
-            });
         })
-}
+    } catch (err) {
+        next(err);
+    }
+};
+
+exports.deleteCurrentUser = async (req, res, next) => {
+    // not actual deleting
+    try {
+        await User.findByIdAndUpdate(req.user.id, { active: false });
+        res.status(204).json({
+            status: 'success',
+            data: null
+        });
+    } catch (err) {
+        next(err);
+    }
+};
 
 exports.updateUser = async (req, res, next) => {
     try {
