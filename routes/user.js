@@ -9,6 +9,22 @@ router.post('/login', authController.login);
 
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
+router.patch(
+    '/updatePassword',
+    authController.authCheck,
+    authController.updatePassword
+);
+
+router.patch(
+    '/updateCurrentUser',
+    authController.authCheck,
+    userController.updateCurrentUser
+);
+router.delete(
+    '/deleteCurrentUser',
+    authController.authCheck,
+    userController.deleteCurrentUser
+);
 
 router
     .route('/')
@@ -19,9 +35,5 @@ router
     .get(userController.getUser)
     .patch(userController.updateUser)
     .delete(userController.deleteUser);
-
-router
-    .route('/verify')
-    .post(userController.verifyLogin);
 
 module.exports = router;
