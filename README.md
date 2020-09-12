@@ -70,6 +70,7 @@ A RESTful API for MongoDB with user authentication and general security features
 - To start the app in productin mode:
   
         npm run start:prod
+        // this will set NODE_ENV to "production"
 
 - To start the app in debug mode:
 
