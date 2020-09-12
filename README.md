@@ -16,7 +16,11 @@ A RESTful API for MongoDB with user authentication and general security features
 ## Installation
 1. Clone the repo
 
+        git clone https://github.com/your_username_/Project-Name.git
+
 2. Install NPM packages
+
+        npm install
 
 3. Create an account in mailtrap.io if you want easily test the email password reset functionality. 
    From your profile get these settings:
