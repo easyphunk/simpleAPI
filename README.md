@@ -16,7 +16,7 @@ A RESTful API for MongoDB with user authentication and general security features
 ## Installation
 1. Clone the repo
 
-        git clone https://github.com/your_username_/Project-Name.git
+        git clone https://github.com/easyphunk/simpleAPI.git
 
 2. Install NPM packages
 
